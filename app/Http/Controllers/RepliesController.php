@@ -3,63 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reply;
+use App\Models\Post;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 
 class RepliesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $replies = Reply::all();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function createComment(Request $request, $id)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Reply $reply)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Reply $reply)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Reply $reply)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Reply $reply)
-    {
-        //
+        $post = Post::find($id);
+        $comment = Comment::find($id);
+        
+        $input = $request->input('reply');
+        $comment = Reply::create($input);
+        return response()->json([
+            "reply" => $reply
+        ]);
     }
 }

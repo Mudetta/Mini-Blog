@@ -11,5 +11,15 @@ class Comment extends Model
 
     protected $table = "comments";
 
-    protected $fillable = ["comment", "post_id"];
+    protected $fillable =["comment", "post_id"];
+
+    public function post()
+    {
+        return $this->belongsTo(Post::class)->onDelete("cascade");
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Reply::class);
+    }
 }

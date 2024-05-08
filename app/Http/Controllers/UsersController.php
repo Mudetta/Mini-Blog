@@ -10,55 +10,61 @@ class UsersController extends Controller
 {
     public function register(Request $request)
     {
-        $input = $request->all();
-        $validate = Validator::make($input,[
-            "name" => "required",
-            "email" => "required|email",
-            "password" => "required|min:8"
+        $validator = Validator::make($request->all(),[
+            "name"      => "required",
+            "email"     => "required|email|unique:users,email",
+            "password"  => "required|min:8"
         ]);
+
+        if ($validator->fails())
+        {
+            return response()->json([
+                "message" => "Sorry, registration has been denied",
+                "errors" => $validator->errors()
+            ], 422);
+        }
+
         $user = User::create([
-            "name" => $request->name,
-            "email" => $request->email,
-            "password" => bcrypt($request->password)
+            "name"      => $request->name,
+            "email"     => $request->email,
+            "password"  => bcrypt($request->password)
         ]);
 
-        $token = $user->createToken('miniBlog')->accessToken;
-
+        $token = $user->createToken("miniBlog")->accessToken;
         return response()->json([
-            "token" => $token
-        ]);
+            "message" => "Congrats, Registered successfully",
+            "token"   => $token
+        ], 200);
     }
 
+
     public function login(Request $request)
-    {
+    {   
         $data = [
-            "email" => $request->email,
+            "email"    => $request->email,
             "password" => $request->password
         ];
 
-        if (auth()->attempet($data))
+        if(auth()->attempt($data))
         {
-            $token = auth()->user()->createToken('miniBlog')->accessToken;
-            return resposne()->json([
-                "token" => $token
-            ]);
-            }
-
-            else {
-                return response()->json([
-                    "error" => "user not found"
-                ]);
-            }
-       
+            $token = auth()->user()->createToken("miniBlog")->accessToken;
+            return response()->json([
+                "message" => "Welcome back, Sign in successfully!",
+                "token"   => $token
+            ], 200);
+        } else{
+            return response()->json([
+                "message" => "Sorry, User not found!"
+            ], 401);
+        }
     }
+
 
     public function userInfo()
     {
         $user = auth()->user();
-        return resonse()->json([
-            "user" => $user
-        ]);
+        return response()->json([
+            "userInfo" => $user
+        ], 200);
     }
-
-
 }

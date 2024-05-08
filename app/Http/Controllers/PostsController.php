@@ -14,19 +14,11 @@ class PostsController extends Controller
     public function index()
     {
         $posts = Post::all();
-            return response()->json([
-                'message' => 'Posts fetched succssfully',
-                'posts' => $posts
-        ]);
-   
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            "status"  => "Success",
+            "message" => "All posts fetched successfully!",
+            "posts"   => $posts
+        ], 200);
     }
 
     /**
@@ -34,100 +26,80 @@ class PostsController extends Controller
      */
     public function store(Request $request)
     {
-        $input = $request->all();
-        $validator = Validator::make($input, [
-            "title" => "required",
+        $validator = Validator::make($request->all() ,[
+            "title"       => "required",
             "description" => "required",
-            "user_id" => "required"
+            "user_id"     => "required|exists:users,id"
         ]);
 
-        if ($validator -> fails())
+        if($validator->fails())
         {
             return response()->json([
-                "message" => "sorry, can not store the post",
-                "error" => $validator->error()
+                "status"  => "faild",
+                "message" => "Sorry, couldn't create a post. Check it again",
+                "errors"  => $validator->errors()
             ]);
-
         }
-        
 
-        $post = Post::create($input);
-
+        $post = Post::create($request->all());
         return response()->json([
-            "message" => "Post added successfully",
-            "post" => $post
-        ]);
+            "status"  => "success",
+            "message" => "Post created successfully!",
+            "post"    => $post
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Post $post)
     {
-        $post = Post::find($id);
+        $post = Post::find($post);
 
-        if (is_null($post))
+        if(is_null($post))
         {
             return response()->json([
-                "message" => "Post not found"
-            ]);
+                "status" => "faild",
+                "message" => "Sorry, Post not found!"
+            ], 404);
         }
 
         return response()->json([
-            "message" => "post found successfully",
-            "post" => $post
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Post $post)
-    {
-        //
+            "status" => "success",
+            "post"   => $post
+        ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Post $post)
     {
-        $post = Post::find($id);
-        $validator = Validator::make($input, [
-            "title" => "required",
-            "description" => "required",
-            "user_id" => "required"
+        $request->validate([
+            'title'       => 'required|string',
+            'description' => 'required|string',
+            'user_id'     => 'required|exists:users,id'
         ]);
 
-        if ($validator -> fails())
-        {
-            return response()->json([
-                "message" => "sorry, can not store the post",
-                "error" => $validator->error()
-            ]);
+        $post->update($request->all());
 
-        }
-
-        $post->title = "title";
-        $post->description = "description";
-        $post->save();
-
-        return respnse()->json([
-            "message" => "post updated successfully",
-            "post"  => $post
-        ]);
+        return response()->json([
+            "status"  => "success",
+            "message" => "Post updated successfully!",
+            "post"    => $post
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        $post = Post::find($id);
-        $post->delete();
+        $post = Post::find($post);
 
         return response()->json([
-            "message" => "post deleted successfully"
-        ]);
+            "status" => "success",
+            "message" => "Post deleted successfully"
+        ], 204);
     }
 }

@@ -13,9 +13,13 @@ class Post extends Model
 
     protected $fillable = ["title", "description", "user_id"];
 
-    public function user(): BelongsTo
+    public function user()
     {
-    return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class)->onDelete("cascade");
     }
 
+    public function comments()
+    {
+        return $this->belongsTo(Comment::class)->onDelete("cascade");
+    }
 }

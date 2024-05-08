@@ -3,25 +3,93 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
-use App\Models\Post;
 use Illuminate\Http\Request;
 
-class CommentController extends Controller
+class CommentsController extends Controller
 {
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
         $comments = Comment::all();
+
+        return response()->json([
+            "status" => "success",
+            "comments" => $comments
+        ], 200);
     }
 
-    public function createComment(Request $request, $id)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
-        $post = Post::find($id);
-        
-        $input = $request->input('comment');
-        $comment = Comment::create($input);
-        return response()->json([
-            "comment" => $comment
+        $request->validate([
+            "comment" => "required",
+            "post_id" => "required|exists:posts,id"
         ]);
+
+        $comment = Comment::create($request->all());
+
+        return response()->json([
+            "status" => "success",
+            "message" => "Comment created successfully",
+            "comment" => $comment
+        ], 201);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Comment $comment)
+    {
+        $comment = Comment::find($comment);
+
+        if (is_null($comment))
+        {
+            return response()->json([
+                "status" => "faild",
+                "message" => "Sorry, the comment could not found"
+            ]);
+        }
+        
+        return response()->json([
+            "status" => "success",
+            "message" => "the comment has been found successfully!",
+            "comment" => $comment
+        ], 200);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Comment $comment)
+    {
+        $request->validate([
+            "comment" => "required",
+            "post_id" => "required|exists:posts,id"
+        ]);
+
+        $comment->update($request->all());
+        
+        return response()->json([
+            "status" => "success",
+            "message" => "comment has been updated successfully",
+            "comment" => $comment
+        ], 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Comment $comment)
+    {
+        $comment = Comment::find($comment);
+
+        return response()->json([
+            "status" => "success",
+            "message" => "the comment has been deleted successfully"
+        ], 204);
     }
 }
